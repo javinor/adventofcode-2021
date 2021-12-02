@@ -45,7 +45,7 @@ main :: Effect Unit
 main =
   launchAff_ do
     example <- readTextFile UTF8 "../input/day01.example"
-    real <- readTextFile UTF8 "../input/day01.input"
+    real <- readTextFile UTF8 "../input/day01.real"
     log $ "part1 example: " <> (show $ part1 example)
     log $ "part1 real: " <> (show $ part1 real)
     log $ "part2 example: " <> (show $ part2 example)

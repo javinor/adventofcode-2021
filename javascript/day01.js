@@ -3,7 +3,7 @@ const _ = require('lodash')
 
 const DAY = "01"
 const example = fs.readFileSync(`../input/day${DAY}.example`, 'utf8')
-const input = fs.readFileSync(`../input/day${DAY}.input`, 'utf8')
+const real = fs.readFileSync(`../input/day${DAY}.real`, 'utf8')
 
 const parseInput = input => {
   const lines = input.split('\n')
@@ -32,7 +32,7 @@ const q2 = (numbers) => {
 }
 
 console.log("q1 example: ", q1(parseInput(example)))
-console.log("q1 input: ", q1(parseInput(input)))
+console.log("q1 input: ", q1(parseInput(real)))
 
 console.log("q2 example: ", q2(parseInput(example)))
-console.log("q2 input: ", q2(parseInput(input)))
+console.log("q2 input: ", q2(parseInput(real)))
