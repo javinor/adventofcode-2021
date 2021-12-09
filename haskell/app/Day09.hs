@@ -1,14 +1,11 @@
 module Main where
 
-import Control.Monad (join)
-import Data.List (concatMap, elemIndex, find, findIndex, foldl', intersect, nub, sort)
+import Data.List (sort)
 import Data.List.Split (splitOn)
 import Data.Map (Map, (!?))
 import qualified Data.Map as M
-import Data.Maybe (fromJust, fromMaybe)
 import Data.Set (Set, union, (\\))
 import qualified Data.Set as S
-import Data.Traversable (traverse)
 
 data Point = Point {row :: Int, col :: Int} deriving (Show, Eq, Ord)
 
