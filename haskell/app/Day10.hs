@@ -46,6 +46,7 @@ rowType row = go row []
     go :: [Bracket] -> [Bracket] -> Either Bracket [Bracket]
     go [] stack = Right stack
     go (x@(Bracket Open _) : xs) stack = go xs (x : stack)
+    go (x@(Bracket Closed _) : _) [] = Left x
     go (x@(Bracket Closed t) : xs) ((Bracket _ t') : ys) =
       if t == t'
         then go xs ys
