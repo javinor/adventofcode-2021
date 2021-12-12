@@ -12,62 +12,67 @@ import Data.Set (Set)
 import qualified Data.Set as S
 import Debug.Trace (trace)
 
-type Graph = Map String [String]
+type Graph = Map Cave [Cave]
 
-type Node = String
+type Path = [Cave]
 
-type Path = [String]
+data Cave = Start | End | Small String | Big String deriving (Show, Eq, Ord)
 
 data Visited
-  = CannotVisitAgain (Set Node)
-  | CanVisitAgain (Set Node)
+  = CannotVisitAgain (Set Cave)
+  | CanVisitAgain (Set Cave)
   deriving (Show)
+
+parseCave :: String -> Cave
+parseCave "start" = Start
+parseCave "end" = End
+parseCave name
+  | all isLower name = Small name
+  | all isUpper name = Big name
+  | otherwise = error $ "Failed to parse cave: " <> name
 
 parse :: String -> Graph
 parse = M.unionsWith (++) . fmap parseRow . lines
   where
     parseRow str =
-      let [from, to] = splitOn "-" str
+      let [from, to] = parseCave <$> splitOn "-" str
        in M.fromList [(from, [to]), (to, [from])]
 
-isRestrictedNode :: String -> Bool
-isRestrictedNode node = node /= "start" && node /= "end" && all isLower node
+canVisit :: Visited -> Cave -> Bool
+canVisit _ Start = False
+canVisit _ End = True
+canVisit _ (Big _) = True
+canVisit visited (Small s) =
+  case visited of
+    CanVisitAgain _ -> True
+    CannotVisitAgain vs -> not $ S.member (Small s) vs
 
-canVisit :: Visited -> Node -> Bool
-canVisit visited node
-  | node == "end" = True
-  | all isUpper node = True
-  | isRestrictedNode node =
-    case visited of
-      CannotVisitAgain vs -> not $ S.member node vs
-      CanVisitAgain _ -> True
-  | otherwise = False
+nextVisited :: Cave -> Visited -> Visited
+nextVisited End _ = CannotVisitAgain S.empty
+nextVisited Start visited = visited
+nextVisited (Big _) visited = visited
+nextVisited (Small s) visited =
+  case visited of
+    CannotVisitAgain vs -> CannotVisitAgain $ S.insert (Small s) vs
+    CanVisitAgain vs ->
+      if S.member (Small s) vs
+        then CannotVisitAgain vs
+        else CanVisitAgain (S.insert (Small s) vs)
 
-nextVisited :: Node -> Visited -> Visited
-nextVisited node visited
-  | isRestrictedNode node =
-    case visited of
-      CannotVisitAgain vs -> CannotVisitAgain $ S.insert node vs
-      CanVisitAgain vs ->
-        if S.member node vs
-          then CannotVisitAgain vs
-          else CanVisitAgain (S.insert node vs)
-  | otherwise = visited
-
-dfs :: Graph -> [Node] -> Node -> Visited -> [Path]
-dfs _ path "end" _ = ["end" : path]
+dfs :: Graph -> [Cave] -> Cave -> Visited -> [Path]
+dfs _ path End _ = [End : path]
 dfs g path curr visited =
-    let path' = curr : path
-        next = filter (canVisit visited) $ fromJust $ M.lookup curr g
-     in concatMap (\n -> dfs g path' n (nextVisited n visited)) next
+  let path' = curr : path
+      next = filter (canVisit visited) $ fromJust $ M.lookup curr g
+   in concatMap (\n -> dfs g path' n (nextVisited n visited)) next
 
 part1 input =
   let g = parse input
-   in length $ dfs g [] "start" (CannotVisitAgain S.empty)
+   in length $ dfs g [] Start (CannotVisitAgain S.empty)
 
 part2 input =
   let g = parse input
-   in length $ dfs g [] "start" (CanVisitAgain S.empty)
+   in length $ dfs g [] Start (CanVisitAgain S.empty)
 
 main :: IO ()
 main = do
